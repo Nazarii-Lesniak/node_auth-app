@@ -1,10 +1,10 @@
-import { User, PrismaClient } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
-import { emailService } from './emailService';
-import { tokenService } from './tokenService';
 import bcrypt from 'bcrypt';
-
-const prisma = new PrismaClient();
+import { User } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
+import { emailService } from './emailService.js';
+import { tokenService } from './tokenService.js';
+import { prisma } from '../prismaClient.js';
+import { validationUtil } from '../utils/validation.js';
 
 export type NormalizedUser = {
   id: number;
@@ -31,40 +31,18 @@ function getByEmail(email: string) {
   });
 }
 
-function validateEmail(email: string) {
-  const emailPattern = /^[\w.+-]+@([\w-]+\.){1,3}[\w-]{2,}$/;
-
-  if (!email) {
-    return 'Email is required';
-  }
-
-  if (!emailPattern.test(email)) {
-    return 'Email is not valid';
-  }
-}
-
-function validatePassword(password: string) {
-  if (!password) {
-    return 'Password is required';
-  }
-
-  if (password.length < 6) {
-    return 'At least 6 characters';
-  }
-}
-
 async function register({
   email,
   password,
   name,
 }: Pick<User, 'email' | 'password' | 'name'>) {
-  const emailError = validateEmail(email);
+  const emailError = validationUtil.validateEmail(email);
 
   if (emailError) {
     throw new Error(emailError);
   }
 
-  const passwordError = validatePassword(password);
+  const passwordError = validationUtil.validatePassword(password);
 
   if (passwordError) {
     throw new Error(passwordError);
@@ -199,9 +177,13 @@ async function confirmResetPassword({
 }
 
 async function updateProfile(
-  { email, password, name }: Pick<User, 'email' | 'password' | 'name'>,
-  newPassword: string,
-  newEmail: string,
+  {
+    email,
+    password,
+    name,
+  }: { email: string; password?: string; name?: string },
+  newPassword?: string,
+  newEmail?: string,
 ) {
   const user = await getByEmail(email);
 
@@ -221,7 +203,7 @@ async function updateProfile(
   }
 
   if (password && newPassword) {
-    const passwordError = validatePassword(newPassword);
+    const passwordError = validationUtil.validatePassword(newPassword);
 
     if (passwordError) {
       throw new Error(passwordError);
@@ -280,8 +262,6 @@ export const userService = {
   getAllActive,
   getByEmail,
   register,
-  validateEmail,
-  validatePassword,
   activation,
   login,
   resetPassword,

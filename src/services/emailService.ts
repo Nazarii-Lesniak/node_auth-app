@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 interface EmailService {
   email: string;
@@ -7,7 +6,7 @@ interface EmailService {
   html: string;
 }
 
-const options: SMTPTransport.Options = {
+const options = {
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT) || 587,
   auth: {
