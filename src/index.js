@@ -1,6 +1,10 @@
 import 'dotenv/config';
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import { authRouter } from './routes/authRoutes.js';
+import { userRouter } from './routes/userRoutes.js';
+import { errorMiddleware } from './middlewares/errorMiddleware.js';
+import { ApiError } from './exceptions/ApiError.js';
 
 const app = express();
 
@@ -12,7 +16,16 @@ app.get('/', (request, response) => {
   response.send('Server is runnig;');
 });
 
+app.use('/auth', authRouter);
+app.use('/user', userRouter);
+
+app.use((req, res, next) => {
+  next(ApiError.NotFound());
+});
+
 const PORT = process.env.PORT || 3005;
+
+app.use(errorMiddleware);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
