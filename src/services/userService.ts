@@ -5,11 +5,7 @@ import { emailService } from './emailService.js';
 import { tokenService } from './tokenService.js';
 import { prisma } from '../prismaClient.js';
 import { validationUtil } from '../utils/validation.js';
-
-export type NormalizedUser = {
-  id: number;
-  email: string;
-};
+import { NormalizedUser } from '../types/User.js';
 
 function normalize({ id, email }: User): NormalizedUser {
   return { id, email };
