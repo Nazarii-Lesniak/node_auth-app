@@ -46,7 +46,7 @@ function generateRandomToken() {
   return randomBytes(32).toString('hex');
 }
 
-export const jwtService = {
+export const tokenService = {
   generateAccessToken,
   generateRefreshToken,
   validateAccessToken,

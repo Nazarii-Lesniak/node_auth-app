@@ -1,7 +1,7 @@
 import { User, PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import { emailService } from './emailService';
-import { jwtService } from './jwtService';
+import { tokenService } from './tokenService';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -147,7 +147,7 @@ async function resetPassword({ email }: Pick<User, 'email'>) {
     throw new Error('User not found');
   }
 
-  const resetPasswordToken = jwtService.generateRandomToken();
+  const resetPasswordToken = tokenService.generateRandomToken();
   const expiryDate = new Date();
 
   expiryDate.setHours(expiryDate.getHours() + 1);
