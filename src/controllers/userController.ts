@@ -20,7 +20,7 @@ async function getProfile(
 
     const user = await userService.getByEmail(email);
 
-    response.send(user);
+    response.render('profile', { user, error: null });
   } catch (error) {
     next(error);
   }
@@ -40,7 +40,7 @@ async function updateName(
     const { name } = request.body;
 
     await userService.updateProfile({ email, name });
-    response.send({ name });
+    response.redirect('/user/profile');
   } catch (error) {
     next(error);
   }
@@ -67,7 +67,7 @@ async function updatePassword(
       { email, password: oldPassword },
       newPassword,
     );
-    response.send({ message: 'Password updated' });
+    response.redirect('/user/profile');
   } catch (error) {
     next(error);
   }
@@ -87,7 +87,7 @@ async function updateEmail(
     const { password, newEmail } = request.body;
 
     await userService.updateProfile({ email, password }, undefined, newEmail);
-    response.send({ message: 'Email updated' });
+    response.redirect('/user/profile');
   } catch (error) {
     next(error);
   }

@@ -27,7 +27,9 @@ async function register(
 
     await userService.register({ email, password, name });
 
-    response.send({ message: 'User registered. Please check your email.' });
+    response.render('message', {
+      text: 'User registered. Please check your email.',
+    });
   } catch (error) {
     next(error);
   }
@@ -61,7 +63,7 @@ async function activate(
       httpOnly: true,
     });
 
-    response.redirect(`${process.env.CLIENT_URL}/profile`);
+    response.redirect('/user/profile');
   } catch (error) {
     next(error);
   }
@@ -83,7 +85,7 @@ async function login(
       httpOnly: true,
     });
 
-    response.redirect(`${process.env.CLIENT_URL}/profile`);
+    response.redirect('/user/profile');
   } catch (error) {
     next(error);
   }
@@ -96,7 +98,7 @@ async function logout(
 ) {
   try {
     response.clearCookie('refreshToken');
-    response.redirect(`${process.env.CLIENT_URL}/`);
+    response.redirect('/auth/login');
   } catch (error) {
     next(error);
   }
@@ -111,7 +113,10 @@ async function resetPasswordRequest(
     const { email } = request.body;
 
     await userService.resetPassword({ email });
-    response.redirect(`${process.env.CLIENT_URL}/login`);
+
+    response.render('message', {
+      text: 'Show Success page with a link to login.',
+    });
   } catch (error) {
     next(error);
   }
@@ -141,6 +146,37 @@ async function resetPasswordConfirm(
   }
 }
 
+async function renderRegister(
+  requesr: ExpressRequest,
+  response: ExpressResponse,
+) {
+  response.render('register', { error: null });
+}
+
+async function renderLogin(requesr: ExpressRequest, response: ExpressResponse) {
+  response.render('login', { error: null });
+}
+
+async function renderResetPasswordRequest(
+  requesr: ExpressRequest,
+  response: ExpressResponse,
+) {
+  response.render('reset-password-request', { error: null });
+}
+
+async function renderResetPasswordConfirm(
+  request: ExpressRequest,
+  response: ExpressResponse,
+) {
+  const { email, resetPasswordToken } = request.params;
+
+  response.render('reset-password', {
+    email,
+    token: resetPasswordToken,
+    error: null,
+  });
+}
+
 export const authController = {
   register,
   activate,
@@ -148,4 +184,8 @@ export const authController = {
   logout,
   resetPasswordRequest,
   resetPasswordConfirm,
+  renderRegister,
+  renderLogin,
+  renderResetPasswordRequest,
+  renderResetPasswordConfirm,
 };
