@@ -117,7 +117,6 @@ async function logout(
     const { refreshToken } = request.cookies;
 
     await tokenService.removeToken(refreshToken);
-    response.clearCookie('refreshToken');
 
     response.clearCookie('refreshToken');
     response.redirect('/auth/login');

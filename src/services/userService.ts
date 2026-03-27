@@ -86,6 +86,8 @@ async function activation({
   }
 
   if (user.newEmail === email) {
+    const oldEmail = user.email;
+
     await prisma.user.update({
       where: {
         id: user.id,
@@ -96,6 +98,8 @@ async function activation({
         activationToken: null,
       },
     });
+
+    await emailService.sendMessageToChangeEmail(oldEmail);
 
     return;
   }
@@ -254,8 +258,6 @@ async function updateProfile(
     if (!isPasswordValid) {
       throw new Error('Invalid credentials');
     }
-
-    await emailService.sendMessageToChangeEmail(user.email);
 
     const activationToken = uuidv4();
 

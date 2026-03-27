@@ -17,6 +17,10 @@ export function errorMiddleware(
       return response.redirect('/auth/login');
     }
 
+    if (error.status === 404) {
+      return response.status(404).render('404');
+    }
+
     return response
       .status(error.status)
       .send({ message: error.message, errors: error.errors });

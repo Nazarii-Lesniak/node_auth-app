@@ -29,6 +29,7 @@ async function getProfile(
 async function updateName(
   request: ExpressRequest,
   response: ExpressResponse,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) {
   try {
@@ -42,7 +43,16 @@ async function updateName(
     await userService.updateProfile({ email, name });
     response.redirect('/user/profile');
   } catch (error) {
-    next(error);
+    const { email } = request.user!;
+    const user = await userService.getByEmail(email);
+
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to update name';
+
+    response.render('profile', {
+      user,
+      error: errorMessage,
+    });
   }
 }
 
