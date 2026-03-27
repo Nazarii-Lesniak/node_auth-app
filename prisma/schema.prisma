@@ -16,6 +16,7 @@ model User {
   email                 String    @unique
   name                  String?
   password              String
+  newEmail              String?
   isActivated           Boolean   @default(false)
   activationToken       String?
   resetPasswordToken    String?

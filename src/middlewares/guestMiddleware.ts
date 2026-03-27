@@ -3,11 +3,9 @@ import {
   Response as ExpressResponse,
   NextFunction,
 } from 'express';
-import { ApiError } from '../exceptions/ApiError.js';
 import { tokenService } from '../services/tokenService.js';
-import { isNormalizedUser } from '../types/User.js';
 
-export function authMiddleware(
+export function guestMiddleware(
   request: ExpressRequest,
   response: ExpressResponse,
   next: NextFunction,
@@ -16,19 +14,17 @@ export function authMiddleware(
     const refreshToken = request.cookies.refreshToken;
 
     if (!refreshToken) {
-      throw ApiError.Unauthorized();
+      return next();
     }
 
     const userData = tokenService.validateRefreshToken(refreshToken);
 
-    if (!userData || !isNormalizedUser(userData)) {
-      throw ApiError.Unauthorized();
+    if (userData) {
+      return response.redirect('/user/profile');
     }
 
-    request.user = userData;
-
     next();
-  } catch {
-    next(ApiError.Unauthorized());
+  } catch (error) {
+    next();
   }
 }

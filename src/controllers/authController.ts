@@ -11,6 +11,7 @@ import { tokenService } from '../services/tokenService.js';
 async function register(
   request: ExpressRequest,
   response: ExpressResponse,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) {
   try {
@@ -22,7 +23,9 @@ async function register(
     };
 
     if (errors.email || errors.password) {
-      throw ApiError.BadRequest('Validation error', errors);
+      return response.render('register', {
+        error: errors.email || errors.password,
+      });
     }
 
     await userService.register({ email, password, name });
@@ -31,7 +34,10 @@ async function register(
       text: 'User registered. Please check your email.',
     });
   } catch (error) {
-    next(error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Registration failed';
+
+    response.render('register', { error: errorMessage });
   }
 }
 
@@ -58,9 +64,13 @@ async function activate(
 
     const refreshToken = tokenService.generateRefreshToken(normalizedUser);
 
+    await tokenService.saveToken(user.id, refreshToken);
+
     response.cookie('refreshToken', refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
     });
 
     response.redirect('/user/profile');
@@ -72,6 +82,7 @@ async function activate(
 async function login(
   request: ExpressRequest,
   response: ExpressResponse,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) {
   try {
@@ -80,14 +91,20 @@ async function login(
     const user = await userService.login({ email, password });
     const refreshToken = tokenService.generateRefreshToken(user);
 
+    await tokenService.saveToken(user.id, refreshToken);
+
     response.cookie('refreshToken', refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
     });
 
     response.redirect('/user/profile');
   } catch (error) {
-    next(error);
+    response.render('login', {
+      error: error instanceof Error ? error.message : 'Login failed',
+    });
   }
 }
 
@@ -97,6 +114,11 @@ async function logout(
   next: NextFunction,
 ) {
   try {
+    const { refreshToken } = request.cookies;
+
+    await tokenService.removeToken(refreshToken);
+    response.clearCookie('refreshToken');
+
     response.clearCookie('refreshToken');
     response.redirect('/auth/login');
   } catch (error) {
@@ -115,7 +137,7 @@ async function resetPasswordRequest(
     await userService.resetPassword({ email });
 
     response.render('message', {
-      text: 'Show Success page with a link to login.',
+      text: 'Password reset link sent to your email.',
     });
   } catch (error) {
     next(error);
@@ -131,7 +153,11 @@ async function resetPasswordConfirm(
     const { email, password, resetPasswordToken, confirmation } = request.body;
 
     if (password !== confirmation) {
-      throw ApiError.BadRequest('Passwords do not match');
+      return response.render('reset-password', {
+        error: 'Passwords do not match',
+        email,
+        token: resetPasswordToken,
+      });
     }
 
     await userService.confirmResetPassword({
@@ -140,7 +166,7 @@ async function resetPasswordConfirm(
       resetPasswordToken,
     });
 
-    response.redirect('/auth/login');
+    response.render('message', { text: 'Password changed successfully' });
   } catch (error) {
     next(error);
   }

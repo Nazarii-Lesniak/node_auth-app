@@ -49,6 +49,7 @@ async function updateName(
 async function updatePassword(
   request: ExpressRequest,
   response: ExpressResponse,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) {
   try {
@@ -60,7 +61,12 @@ async function updatePassword(
     const { newPassword, oldPassword, confirmation } = request.body;
 
     if (newPassword !== confirmation) {
-      throw ApiError.BadRequest();
+      const user = await userService.getByEmail(email);
+
+      return response.render('profile', {
+        user,
+        error: 'Passwords do not match',
+      });
     }
 
     await userService.updateProfile(
@@ -68,14 +74,21 @@ async function updatePassword(
       newPassword,
     );
     response.redirect('/user/profile');
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    const { email } = request.user!;
+    const user = await userService.getByEmail(email);
+
+    response.render('profile', {
+      user,
+      error: error.message || 'Failed to update password',
+    });
   }
 }
 
 async function updateEmail(
   request: ExpressRequest,
   response: ExpressResponse,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) {
   try {
@@ -87,9 +100,16 @@ async function updateEmail(
     const { password, newEmail } = request.body;
 
     await userService.updateProfile({ email, password }, undefined, newEmail);
+
     response.redirect('/user/profile');
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    const { email } = request.user!;
+    const user = await userService.getByEmail(email); //
+
+    response.render('profile', {
+      user,
+      error: error.message || 'Failed to update email',
+    });
   }
 }
 

@@ -1,5 +1,6 @@
 import { randomBytes } from 'crypto';
 import { NormalizedUser } from '../types/User.js';
+import { prisma } from '../prismaClient.js';
 import jwt from 'jsonwebtoken';
 
 function generateAccessToken(user: NormalizedUser) {
@@ -46,10 +47,35 @@ function generateRandomToken() {
   return randomBytes(32).toString('hex');
 }
 
+async function saveToken(userId: number, refreshToken: string) {
+  await prisma.token.upsert({
+    where: {
+      userId,
+    },
+    update: {
+      token: refreshToken,
+    },
+    create: {
+      userId,
+      token: refreshToken,
+    },
+  });
+}
+
+async function removeToken(refreshToken: string) {
+  await prisma.token.deleteMany({
+    where: {
+      token: refreshToken,
+    },
+  });
+}
+
 export const tokenService = {
   generateAccessToken,
   generateRefreshToken,
   validateAccessToken,
   validateRefreshToken,
   generateRandomToken,
+  saveToken,
+  removeToken,
 };

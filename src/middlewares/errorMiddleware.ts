@@ -13,6 +13,10 @@ export function errorMiddleware(
   next: NextFunction,
 ) {
   if (error instanceof ApiError) {
+    if (error.status === 401) {
+      return response.redirect('/auth/login');
+    }
+
     return response
       .status(error.status)
       .send({ message: error.message, errors: error.errors });

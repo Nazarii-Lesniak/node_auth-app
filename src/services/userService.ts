@@ -79,7 +79,20 @@ async function activation({
     throw new Error('Invalid activation token');
   }
 
-  if (user.isActivated) {
+  if (user.newEmail) {
+    await prisma.user.update({
+      where: {
+        email,
+      },
+      data: {
+        email: user.newEmail,
+        newEmail: null,
+        activationToken: null,
+      },
+    });
+  }
+
+  if (user.isActivated && !user.newEmail) {
     throw new Error('User already activated');
   }
 
@@ -136,7 +149,7 @@ async function resetPassword({ email }: Pick<User, 'email'>) {
     },
   });
 
-  emailService.sendResetPasswordEmail(email, resetPasswordToken);
+  await emailService.sendResetPasswordEmail(email, resetPasswordToken);
 }
 
 async function confirmResetPassword({
@@ -234,7 +247,7 @@ async function updateProfile(
       throw new Error('Invalid credentials');
     }
 
-    emailService.sendMessageToChangeEmail(email);
+    await emailService.sendMessageToChangeEmail(user.email);
 
     const activationToken = uuidv4();
 
@@ -243,13 +256,12 @@ async function updateProfile(
         email,
       },
       data: {
-        email: newEmail,
-        isActivated: false,
+        newEmail: newEmail,
         activationToken,
       },
     });
 
-    emailService.sendActivationEmail(newEmail, activationToken);
+    await emailService.sendActivationEmail(newEmail, activationToken);
   }
 }
 
