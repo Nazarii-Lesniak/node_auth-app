@@ -74,13 +74,16 @@ async function updatePassword(
       newPassword,
     );
     response.redirect('/user/profile');
-  } catch (error: any) {
+  } catch (error: unknown) {
     const { email } = request.user!;
     const user = await userService.getByEmail(email);
 
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to update password';
+
     response.render('profile', {
       user,
-      error: error.message || 'Failed to update password',
+      error: errorMessage,
     });
   }
 }
@@ -102,13 +105,16 @@ async function updateEmail(
     await userService.updateProfile({ email, password }, undefined, newEmail);
 
     response.redirect('/user/profile');
-  } catch (error: any) {
+  } catch (error: unknown) {
     const { email } = request.user!;
-    const user = await userService.getByEmail(email); //
+    const user = await userService.getByEmail(email);
+
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to update email';
 
     response.render('profile', {
       user,
-      error: error.message || 'Failed to update email',
+      error: errorMessage,
     });
   }
 }

@@ -1,14 +1,13 @@
 export type NormalizedUser = { id: number; email: string };
 
-export function isNormalizedUser(user: any): user is NormalizedUser {
-  if (
-    user !== null &&
-    typeof user === 'object' &&
-    typeof user.id === 'number' &&
-    typeof user.email === 'string'
-  ) {
-    return true;
+export function isNormalizedUser(user: unknown): user is NormalizedUser {
+  if (typeof user !== 'object' || user === null) {
+    return false;
   }
 
-  return false;
+  const candidate = user as Record<string, unknown>;
+
+  return (
+    typeof candidate.id === 'number' && typeof candidate.email === 'string'
+  );
 }

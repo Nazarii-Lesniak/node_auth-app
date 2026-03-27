@@ -69,7 +69,13 @@ async function activation({
   email,
   activationToken,
 }: Pick<User, 'email' | 'activationToken'>) {
-  const user = await getByEmail(email);
+  let user = await getByEmail(email);
+
+  if (!user) {
+    user = await prisma.user.findFirst({
+      where: { newEmail: email },
+    });
+  }
 
   if (!user) {
     throw new Error('User not found');
@@ -79,10 +85,10 @@ async function activation({
     throw new Error('Invalid activation token');
   }
 
-  if (user.newEmail) {
+  if (user.newEmail === email) {
     await prisma.user.update({
       where: {
-        email,
+        id: user.id,
       },
       data: {
         email: user.newEmail,
@@ -90,6 +96,8 @@ async function activation({
         activationToken: null,
       },
     });
+
+    return;
   }
 
   if (user.isActivated && !user.newEmail) {

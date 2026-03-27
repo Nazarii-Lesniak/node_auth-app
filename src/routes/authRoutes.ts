@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authController } from '../controllers/authController.js';
 import { guestMiddleware } from '../middlewares/guestMiddleware.js';
+import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 export const authRouter = Router();
 
@@ -34,7 +35,7 @@ authRouter.post(
   authController.resetPasswordRequest,
 );
 
-authRouter.post('/logout', authController.logout);
+authRouter.post('/logout', authMiddleware, authController.logout);
 
 authRouter.post(
   '/reset-password/confirm',
