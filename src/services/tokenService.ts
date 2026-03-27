@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { NormalizedUser } from './userService.js';
+import { NormalizedUser } from '../types/User.js';
 import jwt from 'jsonwebtoken';
 
 function generateAccessToken(user: NormalizedUser) {

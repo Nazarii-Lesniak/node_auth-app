@@ -1,6 +1,7 @@
 import {
   Request as ExpressRequest,
   Response as ExpressResponse,
+  NextFunction,
 } from 'express';
 import { ApiError } from '../exceptions/ApiError.js';
 
@@ -8,6 +9,8 @@ export function errorMiddleware(
   error: Error,
   request: ExpressRequest,
   response: ExpressResponse,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  next: NextFunction,
 ) {
   if (error instanceof ApiError) {
     return response

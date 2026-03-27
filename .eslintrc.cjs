@@ -3,6 +3,7 @@ module.exports = {
   env: {
     jest: true,
   },
+  ignorePatterns: ['src/views/**/*.ejs'],
   rules: {
     'no-proto': 0,
   },

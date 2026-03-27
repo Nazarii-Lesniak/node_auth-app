@@ -54,9 +54,9 @@ async function activate(
       throw ApiError.NotFound();
     }
 
-    const normalizedUzer = userService.normalize(user);
+    const normalizedUser = userService.normalize(user);
 
-    const refreshToken = tokenService.generateRefreshToken(normalizedUzer);
+    const refreshToken = tokenService.generateRefreshToken(normalizedUser);
 
     response.cookie('refreshToken', refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -140,25 +140,25 @@ async function resetPasswordConfirm(
       resetPasswordToken,
     });
 
-    response.redirect(`${process.env.CLIENT_URL}/login`);
+    response.redirect('/auth/login');
   } catch (error) {
     next(error);
   }
 }
 
 async function renderRegister(
-  requesr: ExpressRequest,
+  request: ExpressRequest,
   response: ExpressResponse,
 ) {
   response.render('register', { error: null });
 }
 
-async function renderLogin(requesr: ExpressRequest, response: ExpressResponse) {
+async function renderLogin(request: ExpressRequest, response: ExpressResponse) {
   response.render('login', { error: null });
 }
 
 async function renderResetPasswordRequest(
-  requesr: ExpressRequest,
+  request: ExpressRequest,
   response: ExpressResponse,
 ) {
   response.render('reset-password-request', { error: null });
