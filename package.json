@@ -37,7 +37,7 @@
     "tsx": "^4.21.0"
   },
   "mateAcademy": {
-    "projectType": "javascript"
+    "projectType": "typescript"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
