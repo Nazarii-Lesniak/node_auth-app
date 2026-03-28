@@ -6,14 +6,10 @@ import { authRouter } from './routes/authRoutes.js';
 import { userRouter } from './routes/userRoutes.js';
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
 import { ApiError } from './exceptions/ApiError.js';
-import { fileURLToPath } from 'node:url';
 
 const app = express();
 
-const __fileName = fileURLToPath(import.meta.url);
-const __dirName = path.dirname(__fileName);
-
-app.set('views', path.join(__dirName, 'views'));
+app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(express.json());
